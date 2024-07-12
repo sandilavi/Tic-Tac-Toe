@@ -1,136 +1,117 @@
-<html>
-  <head>
-    <title> Tic Tac Toe </title>
-    <link rel="icon" href="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg"/>
-    <style>
-      body {
-        background-color: #333333;
-        color: white;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <link rel="icon" href="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg"/>
+  <style>
+    body {
+      background-color: #333333;
+      color: white;
+    }
+    table {
+      border-collapse: collapse;
+      user-select: none;
+    }
+    td {
+      width: 50px;
+      height: 50px;
+      border: 2px solid;
+    }
+    #circle {
+      width: 25px;
+      height: 25px;
+      border: 2px solid;
+      border-radius: 50%;
+      left: 15%;
+      position: relative;
+    }
+    #cross {
+      font-size: 270%;
+      font-weight: bold;
+      left: 25%;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <h2>Tic Tac Toe</h2>
+  <p>Player 1 - O</p>
+  <p>Player 2 - X</p>
+  <p>Player <span id="player_id">1</span> turn.</p>
+  <p id="win"></p>
+  <table>
+    <tr>
+      <td id="p11"></td>
+      <td id="p12"></td>
+      <td id="p13"></td>
+    </tr>
+    <tr>
+      <td id="p21"></td>
+      <td id="p22"></td>
+      <td id="p23"></td>
+    </tr>
+    <tr>
+      <td id="p31"></td>
+      <td id="p32"></td>
+      <td id="p33"></td>
+    </tr>
+  </table>
+  <script>
+    async function getGameState() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/game');
+        const gameState = await response.json();
+        console.log('Game state fetched:', gameState);
+        updateBoard(gameState);
+      } catch (error) {
+        console.error('Error fetching game state:', error);
       }
-      table {
-        border-collapse: collapse;
-        user-select: none;
+    }
+
+    async function resetGame() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/reset', { method: 'POST' });
+        const gameState = await response.json();
+        console.log('Game reset:', gameState);
+        updateBoard(gameState);
+      } catch (error) {
+        console.error('Error resetting game:', error);
       }
-      td {
-        width: 50px;
-        height: 50px;
-        border: 2px solid;
-      }
-      #circle {
-        width: 25px;
-        height: 25px;
-        border: 2px solid;
-        border-radius: 50%;
-        left: 15%;
-        position: relative;
-      }
-      #cross {
-        font-size: 270%;
-        font-weight: bold;
-        left: 25%;
-        position: relative;
-      }
-    </style>
-  </head>
-  <body>
-    <h2> Tic Tac Toe </h2>
-    <p> Player 1 - O </p>
-    <p> Player 2 - X </p>
-    <p> Player <span id="player_id"> 1 </span> turn. </p>
-    <p id="win"></p>
-    <table>
-      <tr>
-        <td id="p11"></td>
-        <td id="p12"></td>
-        <td id="p13"></td>
-      </tr>
-      <tr>
-        <td id="p21"></td>
-        <td id="p22"></td>
-        <td id="p23"></td>
-      </tr>
-      <tr>
-        <td id="p31"></td>
-        <td id="p32"></td>
-        <td id="p33"></td>
-      </tr>
-    </table>
-    <script>
-      let player = 1;
-      let filled = 0;
+    }
 
-      document.querySelectorAll("td").forEach(function (td) {
-        td.onclick = function () {
-          if (!this.innerHTML) { // this.innerHTML means that the event listener is attached("td" element) checks that contains an element.
-          // !this.innerHTML means checked that the clicked td element doesn't contain an element and if so go through the coding.
-
-            if (player==1) {
-              this.innerHTML = "<div id='circle'></div>"; // Appeared circle in the seleted td element(if it is not contain an element).
-              document.querySelector("#player_id").innerHTML = "2";
-              player = 2;
-            }
-            else {
-              this.innerHTML = "<div id='cross'>&times;</div>"; // Appeared cross in the seleted td element(if it is not contain an element).
-              document.querySelector("#player_id").innerHTML = "1";
-              player = 1;
-            }
-
-            const box1=document.querySelector("#p11");
-            const box2=document.querySelector("#p12");
-            const box3=document.querySelector("#p13");
-            const box4=document.querySelector("#p21");
-            const box5=document.querySelector("#p22");
-            const box6=document.querySelector("#p23");
-            const box7=document.querySelector("#p31");
-            const box8=document.querySelector("#p32");
-            const box9=document.querySelector("#p33");
-
-            const player1Win = (box1.querySelector("#circle") && box2.querySelector("#circle") && box3.querySelector("#circle")) ||
-                               (box4.querySelector("#circle") && box5.querySelector("#circle") && box6.querySelector("#circle")) ||
-                               (box7.querySelector("#circle") && box8.querySelector("#circle") && box9.querySelector("#circle")) ||
-
-                               (box1.querySelector("#circle") && box4.querySelector("#circle") && box7.querySelector("#circle")) ||  
-                               (box2.querySelector("#circle") && box5.querySelector("#circle") && box8.querySelector("#circle")) ||  
-                               (box3.querySelector("#circle") && box6.querySelector("#circle") && box9.querySelector("#circle")) ||
-
-                               (box1.querySelector("#circle") && box5.querySelector("#circle") && box9.querySelector("#circle")) ||
-                               (box3.querySelector("#circle") && box5.querySelector("#circle") && box7.querySelector("#circle"));
-
-            const player2Win = (box1.querySelector("#cross") && box2.querySelector("#cross") && box3.querySelector("#cross")) ||
-                               (box4.querySelector("#cross") && box5.querySelector("#cross") && box6.querySelector("#cross")) ||
-                               (box7.querySelector("#cross") && box8.querySelector("#cross") && box9.querySelector("#cross")) ||
-
-                               (box1.querySelector("#cross") && box4.querySelector("#cross") && box7.querySelector("#cross")) ||  
-                               (box2.querySelector("#cross") && box5.querySelector("#cross") && box8.querySelector("#cross")) ||  
-                               (box3.querySelector("#cross") && box6.querySelector("#cross") && box9.querySelector("#cross")) ||
-
-                               (box1.querySelector("#cross") && box5.querySelector("#cross") && box9.querySelector("#cross")) ||
-                               (box3.querySelector("#cross") && box5.querySelector("#cross") && box7.querySelector("#cross"));                 
-
-            if (player1Win) {
-              document.querySelector("#win").innerHTML = "Player 1 win!";
-              /*document.querySelectorAll("td").forEach(function (td) {
-                td.onclick=null; // After player 1 win, this disable that both users can't select a box as the game is over.
-              });*/
-            }
-
-            if (player2Win) {
-              document.querySelector("#win").innerHTML = "Player 2 win!";
-              document.querySelectorAll("td").forEach(function (td) {
-                td.onclick=null; // After player 2 win, this disable that both users can't select a box as the game is over.
-              });
-            }
-
-            filled++;
-            if (filled==9 && !player1Win && !player2Win) {
-              // filled==9 is essential beacuse without it program shows "It's a draw!" in the very first move.
-              // !player1Win is need beacuse if the player1 win in the 5th move, program shows "It's a draw!" instead of "Player 1 win!".
-              document.querySelector("#win").innerHTML = "It's a draw!";
-            }
-
-          }
-        };
+    function updateBoard(gameState) {
+      document.querySelectorAll("td").forEach((td, index) => {
+        td.innerHTML = gameState.board[index] === 'O' ? "<div id='circle'></div>" :
+                       gameState.board[index] === 'X' ? "<div id='cross'>&times;</div>" : "";
       });
-    </script>
-  </body>
+      document.querySelector("#player_id").innerHTML = gameState.currentPlayer === 'O' ? "1" : "2";
+      document.querySelector("#win").innerHTML = gameState.winner ? (gameState.winner === 'Draw' ? "It's a draw!" : `Player ${gameState.winner === 'O' ? 1 : 2} wins!`) : "";
+    }
+
+    document.querySelectorAll("td").forEach((td, index) => {
+      td.onclick = async function () {
+        if (!td.innerHTML && !document.querySelector("#win").innerHTML) {
+          try {
+            const response = await fetch('http://127.0.0.1:5000/move', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ index }),
+            });
+            const gameState = await response.json();
+            console.log('Move made:', gameState);
+            updateBoard(gameState);
+          } catch (error) {
+            console.error('Error making move:', error);
+          }
+        }
+      };
+    });
+
+    window.onload = resetGame;
+  </script>
+</body>
 </html>
