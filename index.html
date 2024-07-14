@@ -65,7 +65,7 @@
         let gameFinished = false;
 
         async function fetchGameState() {
-            const response = await fetch('http://127.0.0.1:5000/game');
+            const response = await fetch('https://tic-tac-toe-with-database.onrender.com/game');
             const data = await response.json();
             document.querySelector("#player1_wins").textContent = data.player1_wins;
             document.querySelector("#player2_wins").textContent = data.player2_wins;
@@ -80,7 +80,7 @@
                 if (board[index] || gameFinished) return;
 
                 board[index] = currentPlayer === 1 ? "O" : "X";
-                const response = await fetch('http://127.0.0.1:5000/move', {
+                const response = await fetch('https://tic-tac-toe-with-database.onrender.com/move', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
