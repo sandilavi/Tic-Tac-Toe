@@ -2,11 +2,22 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:1234@localhost:3306/tic_tac_toe'
+
+# Use environment variable for the database URL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_POOL_SIZE'] = 10
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 30
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 1800
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 20
 db = SQLAlchemy(app)
 
 # Check database connection status
@@ -83,8 +94,6 @@ def make_move():
         "player2_wins": game_state.player2_wins,
         "draws": game_state.draws
     })
-
-
 
 @app.route('/reset', methods=['POST'])
 def reset_game():
