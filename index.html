@@ -1,117 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic Tac Toe</title>
-  <link rel="icon" href="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg"/>
-  <style>
-    body {
-      background-color: #333333;
-      color: white;
-    }
-    table {
-      border-collapse: collapse;
-      user-select: none;
-    }
-    td {
-      width: 50px;
-      height: 50px;
-      border: 2px solid;
-    }
-    #circle {
-      width: 25px;
-      height: 25px;
-      border: 2px solid;
-      border-radius: 50%;
-      left: 15%;
-      position: relative;
-    }
-    #cross {
-      font-size: 270%;
-      font-weight: bold;
-      left: 25%;
-      position: relative;
-    }
-  </style>
+    <title>Tic Tac Toe</title>
+    <link rel="icon" href="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg"/>
+    <style>
+        body {
+            background-color: #333333;
+            color: white;
+        }
+        table {
+            border-collapse: collapse;
+            user-select: none;
+        }
+        td {
+            width: 50px;
+            height: 50px;
+            border: 2px solid;
+        }
+        #circle {
+            width: 25px;
+            height: 25px;
+            border: 2px solid;
+            border-radius: 50%;
+            left: 15%;
+            position: relative;
+        }
+        #cross {
+            font-size: 270%;
+            font-weight: bold;
+            left: 25%;
+            position: relative;
+        }
+    </style>
 </head>
 <body>
-  <h2>Tic Tac Toe</h2>
-  <p>Player 1 - O</p>
-  <p>Player 2 - X</p>
-  <p>Player <span id="player_id">1</span> turn.</p>
-  <p id="win"></p>
-  <table>
-    <tr>
-      <td id="p11"></td>
-      <td id="p12"></td>
-      <td id="p13"></td>
-    </tr>
-    <tr>
-      <td id="p21"></td>
-      <td id="p22"></td>
-      <td id="p23"></td>
-    </tr>
-    <tr>
-      <td id="p31"></td>
-      <td id="p32"></td>
-      <td id="p33"></td>
-    </tr>
-  </table>
-  <script>
-    async function getGameState() {
-      try {
-        const response = await fetch('http://127.0.0.1:5000/game');
-        const gameState = await response.json();
-        console.log('Game state fetched:', gameState);
-        updateBoard(gameState);
-      } catch (error) {
-        console.error('Error fetching game state:', error);
-      }
-    }
+    <h2>Tic Tac Toe</h2>
+    <p>Player 1 - O</p>
+    <p>Player 2 - X</p>
+    <p id="player_id">Player 1 turn.</p>
+    <p id="win"></p>
+    <p>Player 1 Wins: <span id="player1_wins">0</span></p>
+    <p>Player 2 Wins: <span id="player2_wins">0</span></p>
+    <p>Draws: <span id="draws">0</span></p>
+    <table>
+        <tr>
+            <td id="p11"></td>
+            <td id="p12"></td>
+            <td id="p13"></td>
+        </tr>
+        <tr>
+            <td id="p21"></td>
+            <td id="p22"></td>
+            <td id="p23"></td>
+        </tr>
+        <tr>
+            <td id="p31"></td>
+            <td id="p32"></td>
+            <td id="p33"></td>
+        </tr>
+    </table>
+    <script>
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = 1;
+        let gameFinished = false;
 
-    async function resetGame() {
-      try {
-        const response = await fetch('http://127.0.0.1:5000/reset', { method: 'POST' });
-        const gameState = await response.json();
-        console.log('Game reset:', gameState);
-        updateBoard(gameState);
-      } catch (error) {
-        console.error('Error resetting game:', error);
-      }
-    }
-
-    function updateBoard(gameState) {
-      document.querySelectorAll("td").forEach((td, index) => {
-        td.innerHTML = gameState.board[index] === 'O' ? "<div id='circle'></div>" :
-                       gameState.board[index] === 'X' ? "<div id='cross'>&times;</div>" : "";
-      });
-      document.querySelector("#player_id").innerHTML = gameState.currentPlayer === 'O' ? "1" : "2";
-      document.querySelector("#win").innerHTML = gameState.winner ? (gameState.winner === 'Draw' ? "It's a draw!" : `Player ${gameState.winner === 'O' ? 1 : 2} wins!`) : "";
-    }
-
-    document.querySelectorAll("td").forEach((td, index) => {
-      td.onclick = async function () {
-        if (!td.innerHTML && !document.querySelector("#win").innerHTML) {
-          try {
-            const response = await fetch('http://127.0.0.1:5000/move', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ index }),
+        async function fetchGameState() {
+            const response = await fetch('http://127.0.0.1:5000/game');
+            const data = await response.json();
+            document.querySelector("#player1_wins").textContent = data.player1_wins;
+            document.querySelector("#player2_wins").textContent = data.player2_wins;
+            document.querySelector("#draws").textContent = data.draws;
+            document.querySelectorAll("td").forEach((td, index) => {
+                td.innerHTML = board[index] === "O" ? "<div id='circle'></div>" : (board[index] === "X" ? "<div id='cross'>&times;</div>" : "");
             });
-            const gameState = await response.json();
-            console.log('Move made:', gameState);
-            updateBoard(gameState);
-          } catch (error) {
-            console.error('Error making move:', error);
-          }
         }
-      };
-    });
 
-    window.onload = resetGame;
-  </script>
+        document.querySelectorAll("td").forEach((td, index) => {
+            td.onclick = async function() {
+                if (board[index] || gameFinished) return;
+
+                board[index] = currentPlayer === 1 ? "O" : "X";
+                const response = await fetch('http://127.0.0.1:5000/move', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ board, current_player: currentPlayer, index })
+                });
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                board = data.board;
+                gameFinished = data.winner || !data.board.includes("");
+                
+                currentPlayer = data.current_player;
+                document.querySelector("#player_id").textContent = data.winner ? (data.winner === "O" ? "Player 1 wins!" : "Player 2 wins!") : (data.board.includes("") ? `Player ${currentPlayer} turn.` : " Match Drawn!");
+                document.querySelector("#player1_wins").textContent = data.player1_wins;
+                document.querySelector("#player2_wins").textContent = data.player2_wins;
+                document.querySelector("#draws").textContent = data.draws;
+                
+                document.querySelectorAll("td").forEach((td, index) => {
+                    td.innerHTML = board[index] === "O" ? "<div id='circle'></div>" : (board[index] === "X" ? "<div id='cross'>&times;</div>" : "");
+                });
+            };
+        });
+
+        fetchGameState();
+    </script>
 </body>
 </html>
